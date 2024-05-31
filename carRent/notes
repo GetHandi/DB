@@ -1,0 +1,87 @@
+// Создание QStackedWidget
+QStackedWidget *stackedWidget = new QStackedWidget;
+
+// Создание экранов
+QWidget *mainScreen = new QWidget;
+// Добавление элементов управления на mainScreen
+// ...
+
+QWidget *dataInputScreen = new QWidget;
+// Добавление элементов управления для ввода данных
+// ...
+
+// Добавление экранов в QStackedWidget
+stackedWidget->addWidget(mainScreen);
+stackedWidget->addWidget(dataInputScreen);
+
+// Навигация на экран с вводом данных по нажатию кнопки на главном экране
+connect(mainScreenButton, &QPushButton::clicked, [=]() {
+    stackedWidget->setCurrentIndex(1); // Индекс экрана с вводом данных
+});
+
+// Удаление текущей цепочки
+stackedWidget->setCurrentIndex(0); // Переключение на главный экран
+stackedWidget->removeWidget(dataInputScreen); // Удаление экрана с вводом данных
+
+// Создание нового экрана с главной навигацией
+QWidget *newMainScreen = new QWidget;
+// Добавление элементов управления на новый главный экран
+// ...
+stackedWidget->addWidget(newMainScreen);
+
+
+
+
+Для реализации метода нажатия кнопки для перехода в основное меню на экране Car, где stackedWidget должен быть обновлен, и при этом необходимо правильно освободить память, вам нужно сделать следующее:
+
+В классе FormCar, где находится кнопка перехода в основное меню, определите слот для обработки нажатия этой кнопки. В этом слоте вы можете изменить текущее отображаемое окно stackedWidget.
+
+В методе обработки нажатия кнопки, помимо смены экрана в stackedWidget, не забудьте освободить память, связанную с текущим экраном Car, чтобы избежать утечки памяти.
+
+После того как вы освободили память от текущего экрана Car, вы можете добавить новый экран в stackedWidget, который представляет собой основное меню.
+
+Примерно код может выглядеть следующим образом:
+
+cpp
+
+// Слот для обработки нажатия кнопки перехода в основное меню на экране Car
+void FormCar::on_toMainMenuButton_clicked()
+{
+    // Освободить память занятую формой Car
+    delete formCar;
+
+    // Создать новую форму для основного меню
+    FormMainMenu *formMainMenu = new FormMainMenu;
+
+    // Добавить форму основного меню в stackedWidget
+    stackedWidget->addWidget(formMainMenu);
+
+    // Установить текущий индекс для новой формы в stackedWidget
+    stackedWidget->setCurrentIndex(stackedWidget->indexOf(formMainMenu));
+}
+
+
+
+
+но тогда QLineEdit которые находятся в FormCar остаются заполненными, то есть она не обновляется
+Для очистки данных в QLineEdit при переключении между формами, вы можете использовать метод clear() для каждого QLineEdit, когда происходит переключение на другую форму. Вот примерно так это может выглядеть:
+
+cpp
+
+void MainWindow::showMenuForm()
+{
+    stackedWidget->setCurrentIndex(0); // Показать форму меню (индекс 0)
+    formCar->clearInputFields(); // Очистить введенные данные в FormCar
+}
+Далее, в классе FormCar добавьте метод clearInputFields(), который будет очищать данные в QLineEdit:
+
+cpp
+
+void FormCar::clearInputFields()
+{
+    ui->lineEdit1->clear(); // Очистить данные в первом QLineEdit
+    ui->lineEdit2->clear(); // Очистить данные во втором QLineEdit
+    // ...
+    // Продолжайте для каждого QLineEdit на вашей форме
+}
+Это позволит очистить данные в QLineEdit формы FormCar при переключении на другую форму.
